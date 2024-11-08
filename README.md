@@ -135,6 +135,8 @@ A detailed file structure would be as follows:
    └─ ...                                # other intermediate directories, such as "tiles-l2-s256" from the first step.         
 ```
 
+## Training-Validation Splits
+Splits for each cancer type are found in the `splits/5foldcv ` folder, which are randomly partitioned each dataset using 5-fold cross-validation. Each one contains splits_{k}.csv for k = 1 to 5. To compare with MCAT, we follow the same splits as that of MCAT.
 
 ## Training
 ```bash
