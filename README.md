@@ -3,7 +3,7 @@
 This is an official implementation of 'Unsupervised Graph Domain Adaptation with Dual Perturbation Branch for Survival Analysis' :fire:.
 
 <div  align="center"> 
-  <img src="https://github.com/yuntaoshou/MGLRA/blob/main/archi.png" width=100% />
+  <img src="https://github.com/yuntaoshou/CDPB/blob/main/fig/archi.png" width=100% />
 </div>
 
 
