@@ -46,7 +46,7 @@ if __name__ == '__main__':
     parser.add_argument('--l2', type=float, default=0.00005, metavar='L2', help='L2 regularization weight')
     parser.add_argument('--batch-size', type=int, default=1, metavar='BS', help='batch size')
     parser.add_argument('--num_features', type=int, default=1024, help="input size")
-    parser.add_argument('--epochs', type=int, default=1, metavar='E', help='number of epochs')
+    parser.add_argument('--epochs', type=int, default=15, metavar='E', help='number of epochs')
 
     parser.add_argument('--source_dataset', type=str, default="LUAD", help="BLCA, BRCA, LGG, LUAD, UCEC")
     parser.add_argument('--source_dataset_dir', type=str, default="/data/ypq/LUAD_Features", help="/data/ypq/BLCA_Features, \
@@ -94,6 +94,3 @@ if __name__ == '__main__':
 
     pretraining(args)
     EM_training(args)
-
-
-
