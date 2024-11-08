@@ -465,7 +465,7 @@ def first_brunch(args):
                 if val_best_score < c_index:
                     val_best_score = c_index
                     val_best_epoch = epoch
-                    torch.save(model.state_dict(), os.path.join(current_path, f'pretraining/first_{args.source_dataset}_{args.target_dataset_dir}.pth'))
+                    torch.save(model.state_dict(), os.path.join(current_path, f'pretraining/first_{args.source_dataset}_{args.target_dataset}.pth'))
                     print(' *** best c-index={:.4f} at epoch {}'.format(val_best_score, val_best_epoch))
 
                 print('[Test {}/{}] -'.format(epoch, args.epochs), 'Loss: {:.4f} -'.format(val_loss / (step + 1)),
@@ -629,8 +629,6 @@ def second_brunch(args):
                         img, status = img.to(args.device), status.type(torch.FloatTensor).to(args.device)
                         label = label.type(torch.LongTensor).to(args.device)
                     _, outputs, S = model(img)  # 前向传播
-                    if not status.byte().any():
-                        continue  # if all zeros, no event occured, skip
 
                     loss = nll_loss(outputs, S, label, status)
 
@@ -648,7 +646,7 @@ def second_brunch(args):
                 if val_best_score < c_index:
                     val_best_score = c_index
                     val_best_epoch = epoch
-                    torch.save(model.state_dict(), os.path.join(current_path, f'pretraining/first_{args.source_dataset}_{args.target_dataset_dir}.pth'))
+                    torch.save(model.state_dict(), os.path.join(current_path, f'pretraining/secpmd_{args.source_dataset}_{args.target_dataset}.pth'))
                     print(' *** best c-index={:.4f} at epoch {}'.format(val_best_score, val_best_epoch))
 
                 print('[Test {}/{}] -'.format(epoch, args.epochs), 'Loss: {:.4f} -'.format(val_loss / (step + 1)),
@@ -694,7 +692,7 @@ def EM_training(args):
     if not os.path.exists(EM_first_results_dir):
         os.makedirs(EM_first_results_dir)
 
-    EM_second_results_dir = "./EM_first_results/{source_dataset}/[{target_dataset}]-[{time}]".format(
+    EM_second_results_dir = "./EM_second_results/{source_dataset}/[{target_dataset}]-[{time}]".format(
         source_dataset=args.source_dataset,
         target_dataset=args.target_dataset,
         time=time.strftime("%Y-%m-%d]-[%H-%M-%S"),
@@ -779,7 +777,7 @@ def EM_training(args):
         model_first = GNN(args, num_features=args.num_features, num_classes=args.prediction_size, conv_type=args.first_conv_type, 
                     pool_type=args.pool_type, emb=True, perturb_position=args.pp)
 
-        model_first.load_state_dict(torch.load(f'pretraining/first_{args.source_dataset}_{args.target_dataset_dir}.pth', map_location=f'cuda:{args.device}'))
+        model_first.load_state_dict(torch.load(f'pretraining/first_{args.source_dataset}_{args.target_dataset}.pth', map_location=f'cuda:{args.device}'))
 
         if args.cuda:
             model_first = model_first.to(args.device)
@@ -793,7 +791,7 @@ def EM_training(args):
 
         model_second = PathNN(args, args.num_features, args.projection_size, args.cutoff, args.prediction_size, args.dropout, args.device, residuals=True, 
                        encode_distances=False, perturb_position=args.pp)
-        model_second.load_state_dict(torch.load(f'pretraining/second_{args.source_dataset}_{args.target_dataset_dir}.pth', map_location=f'cuda:{args.device}'))
+        model_second.load_state_dict(torch.load(f'pretraining/second_{args.source_dataset}_{args.target_dataset}.pth', map_location=f'cuda:{args.device}'))
 
         if args.cuda:
             model_second = model_second.to(args.device)
@@ -815,8 +813,8 @@ def EM_training(args):
         ################## coupling 
         top_E, top_M = 0,0  
         for em_step in range(args.EM_epochs):
-            if os.path.exists(f'./pretraining/M_second_{args.source_dataset}_{args.target_dataset_dir}.pth'):
-                model_second.load_state_dict(torch.load(f'pretraining/M_second_{args.dataset_name}_{args.target_dataset_dir}.pth'))
+            if os.path.exists(f'./pretraining/M_second_{args.source_dataset}_{args.target_dataset}.pth'):
+                model_second.load_state_dict(torch.load(f'pretraining/M_second_{args.dataset_name}_{args.target_dataset}.pth'))
             source_second_feature, source_second_pred, source_second_label, source_second_surv, _, _ = inference(args, model_second, second_source_train_loader)
             target_second_feature, target_second_pred, target_second_label, target_second_surv, _, _ = inference(args, model_second, second_target_val_loader)
             # target_second_pred = torch.nn.Softmax(-1)(target_second_pred)
@@ -889,7 +887,7 @@ def EM_training(args):
                     val_best_first_score = E_target_cindex
                     print(' *** best E_c-index={:.4f}'.format(E_target_cindex))
                     torch.save(model_first.state_dict(),
-                            os.path.join(current_path, f'./pretraining/E_first_{args.source_dataset}_{args.target_dataset_dir}_E.pth'))
+                            os.path.join(current_path, f'./pretraining/E_first_{args.source_dataset}_{args.target_dataset}_E.pth'))
                     
                 if top_E < E_target_cindex:
                     top_E = E_target_cindex
@@ -977,7 +975,7 @@ def EM_training(args):
                     val_best_second_epoch = em_step
                     val_best_second_score = M_target_cindex
                     torch.save(model_second.state_dict(),
-                            os.path.join(current_path, f'./pretraining/M_second_{args.source_dataset}_{args.target_dataset_dir}_M.pth'))
+                            os.path.join(current_path, f'./pretraining/M_second_{args.source_dataset}_{args.target_dataset}_M.pth'))
                     
                 if top_M < M_target_cindex.item():
                     top_M = M_target_cindex.item()
@@ -1018,11 +1016,3 @@ def EM_training(args):
         writer.writerow(header)
         writer.writerow(best_second_epoch)
         writer.writerow(best_second_score)
-
-
-
-
-
-
-
-
