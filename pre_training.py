@@ -646,7 +646,7 @@ def second_brunch(args):
                 if val_best_score < c_index:
                     val_best_score = c_index
                     val_best_epoch = epoch
-                    torch.save(model.state_dict(), os.path.join(current_path, f'pretraining/secpmd_{args.source_dataset}_{args.target_dataset}.pth'))
+                    torch.save(model.state_dict(), os.path.join(current_path, f'pretraining/second_{args.source_dataset}_{args.target_dataset}.pth'))
                     print(' *** best c-index={:.4f} at epoch {}'.format(val_best_score, val_best_epoch))
 
                 print('[Test {}/{}] -'.format(epoch, args.epochs), 'Loss: {:.4f} -'.format(val_loss / (step + 1)),
@@ -789,7 +789,7 @@ def EM_training(args):
         second_source_train_loader = first_source_train_loader
         second_target_val_loader = first_target_val_loader
 
-        model_second = PathNN(args, args.num_features, args.projection_size, args.cutoff, args.prediction_size, args.dropout, args.device, residuals=True, 
+        model_second = PathNN(args, args.num_features, args.projection_size, args.cutoff, args.prediction_size, args.device, args.dropout, residuals=True, 
                        encode_distances=False, perturb_position=args.pp)
         model_second.load_state_dict(torch.load(f'pretraining/second_{args.source_dataset}_{args.target_dataset}.pth', map_location=f'cuda:{args.device}'))
 
@@ -814,10 +814,11 @@ def EM_training(args):
         top_E, top_M = 0,0  
         for em_step in range(args.EM_epochs):
             if os.path.exists(f'./pretraining/M_second_{args.source_dataset}_{args.target_dataset}.pth'):
-                model_second.load_state_dict(torch.load(f'pretraining/M_second_{args.dataset_name}_{args.target_dataset}.pth'))
+                model_second.load_state_dict(torch.load(f'pretraining/M_second_{args.dataset_name}_{args.target_dataset}.pth', map_location=f'cuda:{args.device}'))
+            if args.cuda:
+                model_second = model_second.to(args.device)
             source_second_feature, source_second_pred, source_second_label, source_second_surv, _, _ = inference(args, model_second, second_source_train_loader)
             target_second_feature, target_second_pred, target_second_label, target_second_surv, _, _ = inference(args, model_second, second_target_val_loader)
-            # target_second_pred = torch.nn.Softmax(-1)(target_second_pred)
 
             '''
             统计label的占比
@@ -1016,3 +1017,11 @@ def EM_training(args):
         writer.writerow(header)
         writer.writerow(best_second_epoch)
         writer.writerow(best_second_score)
+
+
+
+
+
+
+
+
