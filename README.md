@@ -1,6 +1,6 @@
-# Unsupervised Graph Domain Adaptation with Dual Perturbation Branch for Survival Analysis
+# Graph Domain Adaptation with Dual-branch Encoder and Two-level Alignment for Whole Slide Image-based Survival Prediction
 
-This is an official implementation of 'Unsupervised Graph Domain Adaptation with Dual Perturbation Branch for Survival Analysis' :fire:.
+This is an official implementation of 'Graph Domain Adaptation with Dual-branch Encoder and Two-level Alignment for Whole Slide Image-based Survival Prediction' :fire:.
 
 <div  align="center"> 
   <img src="https://github.com/yuntaoshou/CDPB/blob/main/fig/archi.png" width=100% />
